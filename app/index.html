@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЭРИКМЕД Клиника</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 0;
+    }
+    #chat-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    #messages {
+      width: 50%;
+      height: 300px;
+      border: 1px solid #ddd;
+      overflow-y: scroll;
+      padding: 10px;
+    }
+    #input-container {
+      margin-top: 10px;
+    }
+    input {
+      padding: 10px;
+      width: 40%;
+    }
+    button {
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ЭРИКМЕД Клиника Ассистент ЭРИКА</h1>
+  </header>
+  <div id="chat-container">
+    <div id="messages"></div>
+    <div id="input-container">
+      <input id="message-input" type="text" placeholder="Введите сообщение">
+      <button onclick="sendMessage()">Отправить</button>
+    </div>
+  </div>
+  <script>
+    let socket = new WebSocket("ws://localhost:8000/chat");
+
+    socket.onmessage = function(event) {
+      const messages = document.getElementById("messages");
+      const newMessage = document.createElement("div");
+      newMessage.textContent = "ЭРИКА: " + event.data;
+      messages.appendChild(newMessage);
+    };
+
+    function sendMessage() {
+      const input = document.getElementById("message-input");
+      const message = input.value;
+      socket.send(message);
+
+      const messages = document.getElementById("messages");
+      const newMessage = document.createElement("div");
+      newMessage.textContent = "Вы: " + message;
+      messages.appendChild(newMessage);
+
+      input.value = "";
+    }
+  </script>
+</body>
+</html>

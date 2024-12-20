@@ -98,3 +98,44 @@ async def main():
 if __name__ == "__main__":
     import asyncio
     asyncio.run(main())  # Запуск бота
+
+def process_query(user_id: int = Form(...), query: str = Form(...)):
+    """
+    Выполнение SQL-запроса с логированием результата.
+    """
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(query)
+        response = cursor.fetchall()
+        conn.commit()
+        conn.close()
+        log_query(user_id, query, str(response))
+        return {"data": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+import psycopg2
+
+# Вставка данных из API в базу данных
+def insert_api_data(data):
+    connection = psycopg2.connect("dbname=mydb user=myuser password=mypassword host=localhost")
+    cursor = connection.cursor()
+
+    for item in data:
+        cursor.execute(
+            "SELECT add_api_data(%s, %s, %s, %s, %s)",
+            (item['service_name'], item['category_name'], item['price'], item['filial_name'], item['specialist_name'])
+        )
+
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+# Обновление статуса после обработки нейронной сетью
+def update_status(api_data_id, response):
+    connection = psycopg2.connect("dbname=mydb user=myuser password=mypassword host=localhost")
+    cursor = connection.cursor()
+    cursor.execute("SELECT update_processed_status(%s, %s)", (api_data_id, response))
+    connection.commit()
+    cursor.close()
+    connection.close()
